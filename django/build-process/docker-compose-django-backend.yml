@@ -1,0 +1,44 @@
+version: '3.3'
+services:  
+  postgres:
+    platform: 'linux/amd64'
+    image: postgres:latest
+    container_name: backend-postgres-local
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - backend-postgres-local:/var/lib/postgresql/data/
+    networks:
+      - api
+
+  backend:
+    platform: 'linux/amd64'
+    image: backend-django:local
+    container_name: backend-django-local
+    build:
+      context: ../
+      dockerfile: ./build-process/docker-backend-django/Dockerfile
+      args:
+        APP_ENVIRONMENT: 'Local'
+    volumes:
+      - ../:/home/codewithmuh-backend
+    ports:
+      - '8080:8080'
+    env_file:
+      - ./local.backend.env
+    depends_on:
+      - postgres
+    networks:
+      - api
+
+volumes:
+  backend-postgres-local:
+  esdata:
+
+networks:
+  api:
+    driver: bridge

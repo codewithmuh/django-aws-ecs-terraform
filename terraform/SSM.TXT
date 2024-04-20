@@ -1,0 +1,1 @@
+aws ssm put-parameter --name "/dev/goapi/db/password" --value "Jeff_devops.2024" --type String --tags '[{"Key":"Region","Value":"us-east-1"},{"Key":"Environment", "Value":"Dev"},{"Key":"Service", "Value":"go-api-mysql"}]'
