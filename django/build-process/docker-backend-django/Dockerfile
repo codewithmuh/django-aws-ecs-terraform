@@ -13,7 +13,7 @@ RUN apt-get update && \
         supervisor && \
     rm -rf /var/lib/apt/lists/*
 
-COPY ./requirements /home/codewithmuh-backend/requirements
+COPY ./django/requirements /home/codewithmuh-backend/requirements
 RUN mkdir -p /home/codewithmuh-backend/media
 WORKDIR /home/codewithmuh-backend
 
@@ -28,14 +28,15 @@ EXPOSE 8080
 RUN mkdir -p /var/logs/codewithmuh
 
 
-COPY ./build-process/docker-backend-django/scripts /home/docker/scripts
+COPY ./django/build-process/docker-backend-django/scripts /home/docker/scripts
+COPY ./django/build-process/docker-backend-django/config/supervisor-backend.conf /etc/supervisor/conf.d/supervisor-backend.conf
 
 RUN sed -i 's/\r$//' /home/docker/scripts/boot.sh  && \
         chmod +x /home/docker/scripts/boot.sh
 
 
 
-COPY ./ /home/codewithmuh-backend
+COPY ./django /home/codewithmuh-backend
 
 ENTRYPOINT /home/docker/scripts/boot.sh
 
