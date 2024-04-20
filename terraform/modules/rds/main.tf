@@ -6,52 +6,45 @@ resource "aws_db_subnet_group" "private_db_subnet" {
   subnet_ids = var.subnet_ids
 }
 
-# RDS Security Group
+
 resource "aws_security_group" "rds_sg" {
   name        = "${var.environment}-rds-sg"
-  description = "Allow inbound/outbound MySQL traffic"
+  description = "Allows inbound access from ECS only"
   vpc_id      = var.vpc_id
-  #depends_on  = [aws_vpc.main]
-}
-resource "aws_security_group" "default" {
-  name        = "${var.environment}-default-sg"
-  description = "Default security group to allow inbound/outbound from the VPC"
-  vpc_id      = var.vpc_id
-  #depends_on  = [aws_vpc.main]
-}
 
-resource "aws_security_group_rule" "allow_mysql_in" {
-  description              = "Allow inbound MySQL connections"
-  type                     = "ingress"
-  from_port                = "3306"
-  to_port                  = "3306"
-  protocol                 = "tcp"
-  source_security_group_id = aws_security_group.default.id
-  security_group_id        = aws_security_group.rds_sg.id
+  ingress {
+    protocol        = "tcp"
+    from_port       = "5432"
+    to_port         = "5432"
+    security_groups = [aws_security_group.ecs_tasks.id]
+  }
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 
 # RDS Instance
-resource "aws_db_instance" "mysql_8" {
-  allocated_storage = 10               # Storage for instance in gigabytes
-  identifier        = "codeherk-tf-db" # The name of the RDS instance
-  storage_type      = "gp2"            # See storage comparision <https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_Storage.html#storage-comparison>
-  engine            = "mysql"          # Specific Relational Database Software <https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html#Welcome.Concepts.DBInstance>
-
-  # InvalidParameterCombination: RDS does not support creating a DB instance with the following combination: DBInstanceClass=db.t4g.micro, Engine=mysql, EngineVersion=5.7.41,
-  # <https://aws.amazon.com/about-aws/whats-new/2021/09/amazon-rds-t4g-mysql-mariadb-postgresql/>
-  engine_version = "8.0.32"
-  instance_class = "db.t4g.micro" # See instance pricing <https://aws.amazon.com/rds/mysql/pricing/?pg=pr&loc=2>
-  multi_az       = true
-
-  # mysql -u dbadmin -h <ENDPOINT> -P 3306 -D sample -p
-  db_name  = "sngine" # name is deprecated, use db_name instead
-  username = "admin"
-  password = data.aws_ssm_parameter.db_password.value
-
-  db_subnet_group_name = aws_db_subnet_group.private_db_subnet.name # Name of DB subnet group. DB instance will be created in the VPC associated with the DB subnet group.
-  # Error: final_snapshot_identifier is required when skip_final_snapshot is false
-  skip_final_snapshot = true
+resource "aws_db_instance" "production" {
+  allocated_storage       = 10           # Storage for instance in gigabytes
+  identifier              = "production" # The name of the RDS instance
+  storage_type            = "gp2"
+  port                    = "5432"
+  engine                  = "postgres"
+  engine_version          = "15.4"
+  instance_class          = "db.t4g.micro" # See instance pricing <https://aws.amazon.com/rds/postgres/pricing/?pg=pr&loc=2>
+  multi_az                = false
+  db_name                 = "sngine" # name is deprecated, use db_name instead
+  username                = "admin"
+  skip_final_snapshot     = true
+  publicly_accessible     = false
+  backup_retention_period = 7
+  password                = data.aws_ssm_parameter.db_password.value
+  db_subnet_group_name    = aws_db_subnet_group.private_db_subnet.name # Name of DB subnet group. DB instance will be created in the VPC associated with the DB subnet group.
 
   vpc_security_group_ids = [
     aws_security_group.rds_sg.id

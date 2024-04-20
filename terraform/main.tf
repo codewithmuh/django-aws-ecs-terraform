@@ -2,8 +2,8 @@ module "ecs_app" {
   source                       = "./modules/ecs"
   ec2_task_execution_role_name = "myEcsTaskExecutionRole"
   ecs_auto_scale_role_name     = "myEcsAutoScaleRole"
-  app_image                    = "211125414208.dkr.ecr.us-east-1.amazonaws.com/php-website:production"
-  app_port                     = 80
+  app_image                    = "211125414208.dkr.ecr.us-east-1.amazonaws.com/django-app:production"
+  app_port                     = 8000
   app_count                    = 1
   health_check_path            = "/"
   fargate_cpu                  = "1024"
@@ -23,7 +23,7 @@ module "network" {
 
 module "security" {
   source   = "./modules/security"
-  app_port = 80
+  app_port = 8000
   vpc_id   = module.network.vpc_id
 }
 
@@ -47,18 +47,6 @@ module "rds" {
   vpc_id     = module.network.vpc_id
 }
 
-module "redis" {
-  source               = "./modules/redis"
-  depends_on           = [module.network.vpc_id]
-  cluster_id           = "redis-cluster"
-  engine               = "redis"
-  engine_version       = "5.0.6"
-  node_type            = "cache.t2.micro"
-  num_cache_nodes      = 1
-  port                 = 6379
-  subnet_group_name    = "subnet-group"
-  subnet_ids           = [module.network.private_subnet_ids[0],module.network.private_subnet_ids[1]]
-}
 
 module "s3" {
   source = "./modules/s3_img"
