@@ -12,11 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
-from decouple import config
-from celery.schedules import crontab
 from .defaults import *
 
-os.environ['S3_USE_SIGV4'] = 'True'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -178,7 +175,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-STATIC_ROOT = config('staticRootLocation')
+STATIC_ROOT = '/home/codewithmuh-backend/app-content/static_root'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -186,59 +183,7 @@ STATIC_ROOT = config('staticRootLocation')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": (config('REDIS_HOST'), config('REDIS_PORT')),
-        },
-    },
-}
-
-# https://medium.com/@ksarthak4ever/django-handling-periodic-tasks-with-celery-daaa2a146f14
-BROKER_URL = config('BROKER_URL')
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND')
-CELERY_ACCEPT_CONTENT = ['pickle']
-CELERY_TASK_SERIALIZER = 'pickle'
-CELERY_RESULT_SERIALIZER = 'pickle'
-CELERY_TIMEZONE = 'UTC'
-CELERY_TASK_TIME_LIMIT = 30 * 60
-
-
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts':  "elasticsearch:9200",
-        'timeout': 50,  # Increase timeout to 30 seconds or more
-      
-    },
-}
 
 
 
-# Celery Beat
 
-CELERY_BEAT_SCHEDULE = {
-    "sample_task": {
-        "task": "backend.celery_conf.sample_task",
-        "schedule": crontab(minute="*/1"),
-    },
-}
-
-CACHES = {
-    "alternate": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:@redis:6379/1",
-        "OPTIONS": {
-            "DB": 1,
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    },
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://:@redis:6379/1",
-        "OPTIONS": {
-            "DB": 2,
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
-}
