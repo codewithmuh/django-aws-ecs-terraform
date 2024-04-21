@@ -4,7 +4,6 @@ autopep8==2.0.4
 billiard==4.2.0
 boto3==1.28.71
 botocore==1.31.71
-celery==5.3.6
 certifi==2023.11.17
 channels==4.0.0
 channels-redis==4.1.0
@@ -15,7 +14,6 @@ click-repl==0.3.0
 defusedxml==0.7.1
 distlib==0.3.7
 Django==5.0
-django-celery-beat==2.1.0
 django-cors-headers==4.3.1
 django-elasticsearch-dsl==8.0
 django-elasticsearch-dsl-drf==0.22.5
