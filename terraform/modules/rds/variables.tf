@@ -10,3 +10,7 @@ variable "environment" {
 variable "vpc_id" {
   type = string
 }
+
+variable "ecs_tasks_security_group_id" {
+  type = string
+}

@@ -1,8 +1,8 @@
 module "ecs_app" {
   source                       = "./modules/ecs"
-  ec2_task_execution_role_name = "myEcsTaskExecutionRole"
-  ecs_auto_scale_role_name     = "myEcsAutoScaleRole"
-  app_image                    = "211125414208.dkr.ecr.us-east-1.amazonaws.com/django-app:production"
+  ec2_task_execution_role_name = "EcsTaskExecutionRole"
+  ecs_auto_scale_role_name     = "EcsAutoScaleRole"
+  app_image                    = "167365792572.dkr.ecr.ap-south-1.amazonaws.com/django-app:production"
   app_port                     = 8000
   app_count                    = 1
   health_check_path            = "/"
@@ -36,7 +36,7 @@ module "logs" {
 
 module "remote_backend" {
   source              = "./modules/backend"
-  bucket_name         = "jeff-terraform-state-backend-test-3957932"
+  bucket_name         = "jeff-terraform-state-backend"
   dynamodb_table_name = "jeff-terraform-state-lock"
 }
 
@@ -45,10 +45,11 @@ module "rds" {
   depends_on = [module.network.vpc_id]
   subnet_ids = module.network.private_subnet_ids
   vpc_id     = module.network.vpc_id
+  ecs_tasks_security_group_id = module.security.ecs_tasks_security_group_id
 }
 
 
 module "s3" {
   source = "./modules/s3_img"
-  bucket_name = "bucket-img-252563253"
+  bucket_name = "bucket-img-25"
 }

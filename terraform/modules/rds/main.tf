@@ -16,7 +16,7 @@ resource "aws_security_group" "rds_sg" {
     protocol        = "tcp"
     from_port       = "5432"
     to_port         = "5432"
-    security_groups = [aws_security_group.ecs_tasks.id]
+    security_groups = [var.ecs_tasks_security_group_id]
   }
 
   egress {
@@ -38,8 +38,8 @@ resource "aws_db_instance" "production" {
   engine_version          = "15.4"
   instance_class          = "db.t4g.micro" # See instance pricing <https://aws.amazon.com/rds/postgres/pricing/?pg=pr&loc=2>
   multi_az                = false
-  db_name                 = "sngine" # name is deprecated, use db_name instead
-  username                = "admin"
+  db_name                 = "mydatabase" # name is deprecated, use db_name instead
+  username                = "codewithmuh"
   skip_final_snapshot     = true
   publicly_accessible     = false
   backup_retention_period = 7
@@ -55,18 +55,18 @@ resource "aws_db_instance" "production" {
 
 # Reference an SSM parameter for the password (already created in AWS Console)
 data "aws_ssm_parameter" "db_password" {
-  name = "/dev/goapi/db/password"
+  name = "/dev/djangoapi/db/password"
 }
 
 # Create an IAM instance profile for the EC2 instance
 resource "aws_iam_instance_profile" "instance_profile" {
-  name = "ec2-instance-profile"
+  name = "ec2-instance-profile-role"
   role = aws_iam_role.instance_role.name
 }
 
 # Create an IAM role for the EC2 instance
 resource "aws_iam_role" "instance_role" {
-  name = "ec2-instance-role"
+  name = "ec2-instance-role-rds"
 
   assume_role_policy = <<EOF
 {

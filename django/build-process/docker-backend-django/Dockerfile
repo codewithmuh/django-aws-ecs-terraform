@@ -23,7 +23,7 @@ RUN pip install -r ./requirements/requirements.txt
 
 
 
-EXPOSE 8080
+EXPOSE 8000
 
 RUN mkdir -p /var/logs/codewithmuh
 

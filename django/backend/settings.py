@@ -25,10 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+SECRET_KEY ='django-insecure-)#v76@yzv928+j*nc(!11x*7iea)w!64r)7i7yve%l%rd1(&wo'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -41,7 +41,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:3000',
 ]
 
-CSRF_TRUSTED_ORIGINS = ["https://example.com"]
+CSRF_TRUSTED_ORIGINS = ["*"]
 
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -133,11 +133,11 @@ DATABASES = {
     'default': {
         # 'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME':     config('DATABASE_NAME'),
-        'USER':     config('DATABASE_USER'),
-        'PASSWORD': config('DATABASE_PASSWORD'),
-        'HOST':     config('DATABASE_HOST'),
-        'PORT':     config('DATABASE_PORT'),
+        'NAME':     'mydatabase',
+        'USER':     'codewithmuh',
+        'PASSWORD': 'admin123',
+        'HOST':     'production.c3q4aky064ip.ap-south-1.rds.amazonaws.com',
+        'PORT':     '5432',
     }
 }
 

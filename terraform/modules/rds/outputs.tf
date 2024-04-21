@@ -1,6 +1,6 @@
 output "rds_endpoint" {
   description = "The endpoint of the RDS instance"
-  value       = aws_db_instance.mysql_8.endpoint
+  value       = aws_db_instance.production.endpoint
 }
 
 output "rds_security_group_id" {
@@ -15,15 +15,15 @@ output "rds_db_subnet_group_name" {
 
 output "rds_instance_identifier" {
   description = "The identifier of the RDS instance"
-  value       = aws_db_instance.mysql_8.identifier
+  value       = aws_db_instance.production.identifier
 }
 
 output "rds_instance_status" {
   description = "The current status of the RDS instance"
-  value       = aws_db_instance.mysql_8.status
+  value       = aws_db_instance.production.status
 }
 
 output "rds_instance_storage_encrypted" {
   description = "Whether storage is encrypted for the RDS instance"
-  value       = aws_db_instance.mysql_8.storage_encrypted
+  value       = aws_db_instance.production.storage_encrypted
 }
