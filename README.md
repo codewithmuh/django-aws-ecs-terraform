@@ -1,6 +1,7 @@
 # Deploy Dockerize Django App on AWS ECS Fargate using GitHub Actions and Terraform
 
-![aws cost (7)](https://github.com/codewithmuh/django-starter-kit/assets/51082957/71b37d29-ec83-4063-bbcd-7afe11bebc0a)
+![dep (1600 x 1600 px) (5)](https://github.com/codewithmuh/django-aws-ecs-terraform/assets/51082957/16a98238-d6f2-4330-9ef9-cfece739880a)
+
 
 Welcome to the Django Starter Kit, a comprehensive setup designed to streamline Django development using Docker, Celery, ElasticSearch, PostgreSQL, and Swagger.
 
