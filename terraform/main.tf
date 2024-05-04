@@ -2,7 +2,7 @@ module "ecs_app" {
   source                       = "./modules/ecs"
   ec2_task_execution_role_name = "EcsTaskExecutionRoleName"
   ecs_auto_scale_role_name     = "EcsAutoScaleRoleName"
-  app_image                    = "167365792572.dkr.ecr.ap-south-1.amazonaws.com/django-app:production"
+  app_image                    = "167365792572.dkr.ecr.us-west-1.amazonaws.com/django-app:production"
   app_port                     = 8000
   app_count                    = 1
   health_check_path            = "/"
