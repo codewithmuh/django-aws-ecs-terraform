@@ -51,5 +51,5 @@ module "rds" {
 
 module "s3" {
   source = "./modules/s3_img"
-  bucket_name = "bucket-img-codewithmuh"
+  bucket_name = "bucket-image-codewithmuh-454"
 }
