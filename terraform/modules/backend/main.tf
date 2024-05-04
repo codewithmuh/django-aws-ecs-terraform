@@ -1,6 +1,6 @@
 # S3 bucket resource
 resource "aws_s3_bucket" "backend" {
-  bucket = var.bucket_name
+  bucket = "codewithmuh-terraform-state-backend-99"
 }
 
 # Setting S3 bucket ownership controls
