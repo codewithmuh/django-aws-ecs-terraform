@@ -56,17 +56,50 @@ jobs:
   deploy:
     name: Deploy
     runs-on: self-hosted
-
+  
     needs: build-and-push
-    
+  
     steps:
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-
-    - name: Deploy Amazon ECS task definition
-      run: 
-        aws ecs update-service --cluster $ECS_CLUSTER --no-paginate --service $ECS_SERVICE --force-new-deployment
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+  
+      - name: Deploy Amazon ECS task definition
+        id: deploy
+        run: |
+          # Update ECS Service with the new task definition
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition $NEW_TASK_DEFINITION --force-new-deployment
+  
+      - name: Wait for deployment to stabilize
+        id: wait
+        run: |
+          # Wait for the deployment to stabilize
+          STATUS=$(aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --query 'services[0].deployments[0].rolloutState' --output text)
+          while [[ $STATUS != "COMPLETED" && $STATUS != "FAILED" ]]; do
+            echo "Waiting for deployment to stabilize..."
+            sleep 30
+            STATUS=$(aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --query 'services[0].deployments[0].rolloutState' --output text)
+          done
+          echo "Deployment status: $STATUS"
+          echo "::set-output name=status::$STATUS"
+  
+      - name: Rollback if deployment failed
+        if: steps.wait.outputs.status == 'FAILED'
+        run: |
+          # Rollback to the previous task definition
+          PREV_TASK_DEFINITION=$(aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --query 'services[0].deployments[1].taskDefinition' --output text)
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition $PREV_TASK_DEFINITION --force-new-deployment
+          echo "Rollback to previous task definition ($PREV_TASK_DEFINITION) initiated."
+  
+      - name: Notify on rollback
+        if: steps.wait.outputs.status == 'FAILED'
+        run: |
+          echo "Deployment failed. Rollback has been initiated. Please check ECS for further details."
+  
+  
+      - name: Deploy Amazon ECS task definition
+        run: 
+          aws ecs update-service --cluster $ECS_CLUSTER --no-paginate --service $ECS_SERVICE --force-new-deployment
