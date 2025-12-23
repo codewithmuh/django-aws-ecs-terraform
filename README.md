@@ -1,4 +1,4 @@
-# Deploy Dockerize Django App on AWS ECS Fargate using GitHub Actions and Terraform
+# #Deploy Dockerize Django App on AWS ECS Fargate using GitHub Actions and Terraform
 
 ![1i (52)](https://github.com/codewithmuh/django-aws-ecs-terraform/assets/51082957/c8adc871-cb40-4dfe-bf76-d8c732290b12)
 
