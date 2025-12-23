@@ -38,7 +38,6 @@ jobs:
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
-
     - name: Build, tag, and push image to Amazon ECR
       id: build-image
       env:
@@ -53,26 +52,26 @@ jobs:
 
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
-  # deploy:
-  #   name: Deploy
-  #   runs-on: self-hosted
-  
-  #   needs: build-and-push
-  
-  #   steps:
-  #     - name: Configure AWS credentials
-  #       uses: aws-actions/configure-aws-credentials@v4
-  #       with:
-  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #         aws-region: ${{ env.AWS_REGION }}
-  
-  #     - name: Deploy Amazon ECS task definition
-  #       id: deploy
-  #       run: |
-  #         # Update ECS Service with the new task definition
-  #         aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition $NEW_TASK_DEFINITION --force-new-deployment
-  
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+
+    needs: build-and-push
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy Amazon ECS task definition
+        id: deploy
+        run: |
+          # Update ECS Service with the new task definition
+          aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+
       - name: Wait for deployment to stabilize
         id: wait
         run: |
@@ -84,8 +83,8 @@ jobs:
             STATUS=$(aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --query 'services[0].deployments[0].rolloutState' --output text)
           done
           echo "Deployment status: $STATUS"
-          echo "::set-output name=status::$STATUS"
-  
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+
       - name: Rollback if deployment failed
         if: steps.wait.outputs.status == 'FAILED'
         run: |
@@ -93,13 +92,8 @@ jobs:
           PREV_TASK_DEFINITION=$(aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --query 'services[0].deployments[1].taskDefinition' --output text)
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --task-definition $PREV_TASK_DEFINITION --force-new-deployment
           echo "Rollback to previous task definition ($PREV_TASK_DEFINITION) initiated."
-  
+
       - name: Notify on rollback
         if: steps.wait.outputs.status == 'FAILED'
         run: |
           echo "Deployment failed. Rollback has been initiated. Please check ECS for further details."
-  
-  
-      - name: Deploy Amazon ECS task definition
-        run: 
-          aws ecs update-service --cluster $ECS_CLUSTER --no-paginate --service $ECS_SERVICE --force-new-deployment
