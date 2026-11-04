@@ -161,3 +161,14 @@ env
 
 /terraform/.terraform.lock.hcl
 /terraform/.terraform
+# Secrets & Environment Files
+*.backend.env
+*.env
+!.env.example
+!*.backend.env.example
+*.pem
+*.key
+credentials.json
+secrets.json
+*.tfstate
+*.tfstate.*
